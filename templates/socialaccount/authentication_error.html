@@ -1,0 +1,30 @@
+{% extends "socialaccount/snippets/base.html" %}
+{% load i18n %}
+
+{% block title %}{% trans "Social Login Error" %}{% endblock %}
+
+{% block content %}
+<div style="max-width: 600px; margin: 48px auto;">
+    <div class="m3-card">
+        <div class="m3-card-content" style="text-align: center; padding: 48px;">
+            <svg xmlns="http://www.w3.org/2000/svg" width="64" height="64" viewBox="0 0 24 24" fill="none" stroke="var(--md-sys-color-error)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="margin-bottom: 24px;">
+                <circle cx="12" cy="12" r="10"></circle>
+                <line x1="12" y1="8" x2="12" y2="12"></line>
+                <line x1="12" y1="16" x2="12.01" y2="16"></line>
+            </svg>
+            
+            <h2 style="margin-bottom: 16px;">{% trans "Social Login Error" %}</h2>
+            
+            <p class="text-muted mb-4">{% blocktrans with provider_name=account.get_provider.name error=form.errors %}An error occurred while attempting to login with {{ provider_name }}. Here are the details:{{ endblock_trans }}</p>
+            
+            {% for error in form.errors.values %}
+            <div style="background-color: var(--md-sys-color-error-container); padding: 12px; border-radius: var(--md-sys-shape-corner-small); margin-bottom: 16px;">
+                {{ error }}
+            </div>
+            {% endfor %}
+            
+            <a href="{% url 'account_login' %}" class="m3-button m3-button-filled">Try Again</a>
+        </div>
+    </div>
+</div>
+{% endblock %}

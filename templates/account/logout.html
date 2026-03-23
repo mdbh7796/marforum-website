@@ -1,0 +1,25 @@
+{% extends "base.html" %}
+{% load i18n %}
+
+{% block title %}{% trans "Sign Out" %} - Blog Directory{% endblock %}
+
+{% block content %}
+<div class="container">
+    <div style="max-width: 480px; margin: 0 auto; padding: 48px 0;">
+        <div class="m3-card">
+            <div class="m3-card-content" style="text-align: center; padding: 48px;">
+                <h2 style="margin-bottom: 16px;">{% trans "Sign Out" %}</h2>
+                <p class="text-muted mb-4">{% trans 'Are you sure you want to sign out?' %}</p>
+                
+                <form method="post" action="{% url 'account_logout' %}">
+                    {% csrf_token %}
+                    <div style="display: flex; gap: 16px; justify-content: center;">
+                        <button type="submit" class="m3-button m3-button-filled">{% trans 'Sign Out' %}</button>
+                        <a href="{{ request.META.HTTP_REFERER|default:'/' }}" class="m3-button m3-button-outlined">Cancel</a>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

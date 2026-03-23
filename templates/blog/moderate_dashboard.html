@@ -1,0 +1,163 @@
+{% extends 'base.html' %}
+
+{% block title %}Moderation Dashboard - Blog Directory{% endblock %}
+
+{% block content %}
+<div class="container">
+    <h1 class="mb-3">Moderation Dashboard</h1>
+    
+    <!-- Stats Cards -->
+    <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 24px; margin-bottom: 32px;">
+        <div class="m3-card">
+            <div class="m3-card-content" style="text-align: center;">
+                <h2 style="color: var(--md-sys-color-primary); margin-bottom: 8px;">{{ pending_count }}</h2>
+                <p class="text-muted">Pending Comments</p>
+            </div>
+        </div>
+        <div class="m3-card">
+            <div class="m3-card-content" style="text-align: center;">
+                <h2 style="color: #2E7D32; margin-bottom: 8px;">{{ approved_count }}</h2>
+                <p class="text-muted">Approved Comments</p>
+            </div>
+        </div>
+        <div class="m3-card">
+            <div class="m3-card-content" style="text-align: center;">
+                <h2 style="color: var(--md-sys-color-error); margin-bottom: 8px;">{{ rejected_count }}</h2>
+                <p class="text-muted">Rejected Comments</p>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Filter Tabs -->
+    <div style="display: flex; gap: 8px; margin-bottom: 24px; border-bottom: 1px solid var(--md-sys-color-outline-variant); padding-bottom: 16px;">
+        <a href="?status=pending" class="m3-button {% if current_filter == 'pending' %}m3-button-filled{% else %}m3-button-outlined{% endif %}">
+            Pending ({{ pending_count }})
+        </a>
+        <a href="?status=approved" class="m3-button {% if current_filter == 'approved' %}m3-button-filled{% else %}m3-button-outlined{% endif %}">
+            Approved ({{ approved_count }})
+        </a>
+        <a href="?status=rejected" class="m3-button {% if current_filter == 'rejected' %}m3-button-filled{% else %}m3-button-outlined{% endif %}">
+            Rejected ({{ rejected_count }})
+        </a>
+    </div>
+    
+    <!-- Comments List -->
+    {% if comments %}
+    <div style="display: flex; flex-direction: column; gap: 16px;">
+        {% for comment in comments %}
+        <div class="m3-card">
+            <div class="m3-card-content">
+                <div style="display: flex; justify-content: space-between; align-items: start; margin-bottom: 16px;">
+                    <div style="display: flex; align-items: center; gap: 12px;">
+                        {% if comment.author.profile_picture %}
+                        <img src="{{ comment.author.profile_picture.url }}" alt="{{ comment.author.username }}" style="width: 40px; height: 40px; border-radius: 50%; object-fit: cover;">
+                        {% else %}
+                        <div style="width: 40px; height: 40px; border-radius: 50%; background-color: var(--md-sys-color-primary); display: flex; align-items: center; justify-content: center; color: white; font-size: 1rem;">{{ comment.author.username.0|upper }}</div>
+                        {% endif %}
+                        <div>
+                            <span style="font-weight: 600;">{{ comment.author.username }}</span>
+                            <span class="text-muted" style="font-size: 0.875rem; margin-left: 8px;">{{ comment.created_at|date:"M d, Y \a\t H:i" }}</span>
+                        </div>
+                    </div>
+                    <span style="padding: 4px 12px; border-radius: 16px; font-size: 0.75rem; font-weight: 500; 
+                        {% if comment.status == 'pending' %}background-color: #FFF3E0; color: #E65100;
+                        {% elif comment.status == 'approved' %}background-color: #E8F5E9; color: #2E7D32;
+                        {% else %}background-color: #FFEBEE; color: #C62828;{% endif %}">
+                        {{ comment.get_status_display }}
+                    </span>
+                </div>
+                
+                <p style="margin-bottom: 16px; padding: 12px; background-color: var(--md-sys-color-surface-variant); border-radius: var(--md-sys-shape-corner-small);">
+                    {{ comment.content }}
+                </p>
+                
+                <div style="display: flex; align-items: center; gap: 16px; font-size: 0.875rem;">
+                    <span class="text-muted">
+                        On: <a href="{{ comment.post.get_absolute_url }}" style="color: var(--md-sys-color-primary);">{{ comment.post.title|truncatewords:5 }}</a>
+                    </span>
+                    
+                    <div style="margin-left: auto; display: flex; gap: 8px;">
+                        {% if comment.status != 'approved' %}
+                        <form method="post" action="{% url 'blog:toggle_comment_approval' comment.pk %}" style="display: inline;">
+                            {% csrf_token %}
+                            <button type="submit" class="m3-button m3-button-filled" style="padding: 8px 16px; background-color: #2E7D32;">
+                                Approve
+                            </button>
+                        </form>
+                        {% else %}
+                        <form method="post" action="{% url 'blog:toggle_comment_approval' comment.pk %}" style="display: inline;">
+                            {% csrf_token %}
+                            <button type="submit" class="m3-button m3-button-outlined" style="padding: 8px 16px;">
+                                Revoke
+                            </button>
+                        </form>
+                        {% endif %}
+                        
+                        <form method="post" action="{% url 'blog:delete_comment' comment.pk %}" style="display: inline;">
+                            {% csrf_token %}
+                            <button type="submit" class="m3-button m3-button-outlined" style="padding: 8px 16px; color: var(--md-sys-color-error); border-color: var(--md-sys-color-error);">
+                                Delete
+                            </button>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div>
+        {% endfor %}
+    </div>
+    
+    <!-- Pagination -->
+    {% if page_obj.has_other_pages %}
+    <div style="display: flex; justify-content: center; gap: 8px; margin-top: 32px;">
+        {% if page_obj.has_previous %}
+        <a href="?status={{ current_filter }}&page={{ page_obj.previous_page_number }}" class="m3-button m3-button-outlined">Previous</a>
+        {% endif %}
+        
+        {% for num in page_obj.paginator.page_range %}
+            {% if page_obj.number == num %}
+            <span class="m3-button m3-button-filled">{{ num }}</span>
+            {% elif num > page_obj.number|add:'-3' and num < page_obj.number|add:'3' %}
+            <a href="?status={{ current_filter }}&page={{ num }}" class="m3-button m3-button-outlined">{{ num }}</a>
+            {% endif %}
+        {% endfor %}
+        
+        {% if page_obj.has_next %}
+        <a href="?status={{ current_filter }}&page={{ page_obj.next_page_number }}" class="m3-button m3-button-outlined">Next</a>
+        {% endif %}
+    </div>
+    {% endif %}
+    
+    {% else %}
+    <div class="m3-card">
+        <div class="m3-card-content" style="text-align: center; padding: 48px;">
+            <h3 class="text-muted">No {{ current_filter }} comments</h3>
+            <p class="text-muted mt-2">There are no comments to moderate in this category.</p>
+        </div>
+    </div>
+    {% endif %}
+    
+    <!-- Pending Posts (Admin Only) -->
+    {% if user.is_admin_role and pending_posts %}
+    <section style="margin-top: 48px;">
+        <h2 class="mb-3">Posts Pending Review</h2>
+        <div style="display: flex; flex-direction: column; gap: 16px;">
+            {% for post in pending_posts %}
+            <div class="m3-card">
+                <div class="m3-card-content">
+                    <div style="display: flex; justify-content: space-between; align-items: center;">
+                        <div>
+                            <h4>{{ post.title }}</h4>
+                            <p class="text-muted" style="font-size: 0.875rem;">By {{ post.author.username }} • {{ post.created_at|date:"M d, Y" }}</p>
+                        </div>
+                        <div style="display: flex; gap: 8px;">
+                            <a href="{% url 'blog:post_edit' post.slug %}" class="m3-button m3-button-outlined">Review</a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+    </section>
+    {% endif %}
+</div>
+{% endblock %}

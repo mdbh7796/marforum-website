@@ -1,0 +1,40 @@
+# Django Core
+Django>=5.0,<5.3
+dj-database-url>=2.1.0
+
+# Database & Auth
+django-allauth>=0.65.0
+django-allauth[socialaccount]>=0.65.0
+
+# Media & Storage
+Pillow>=10.0.0
+
+# Content Rendering
+markdownify>=0.14.0
+markdown>=3.5.0
+
+# Tagging
+django-taggit>=5.0.0
+django-autocomplete-light>=3.12.1
+
+# Comments (Threaded)
+django-mptt>=0.16.0
+
+# HTMX
+django-htmx>=1.18.0
+
+# Production Server
+gunicorn>=22.0.0
+whitenoise>=6.6.0
+
+# Environment Variables
+python-dotenv>=1.0.0
+
+# Django Debug Toolbar (Dev only)
+django-debug-toolbar>=4.3.0
+
+# Optional: Django REST Framework (if you want an API later)
+djangorestframework>=3.14.0
+
+# Database Production Driver
+psycopg2-binary>=2.9.9

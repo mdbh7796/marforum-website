@@ -1,0 +1,36 @@
+{% extends "socialaccount/snippets/base.html" %}
+{% load i18n %}
+
+{% block title %}{% trans "Social Account Connections" %}{% endblock %}
+
+{% block content %}
+<h1>{% trans "Social Account Connections" %}</h1>
+
+<div style="max-width: 600px; margin: 24px 0;">
+    <div class="m3-card">
+        <div class="m3-card-content">
+            {% if form.accounts %}
+            <p style="margin-bottom: 24px;">{% blocktrans %}You can sign in to your account using any of the following social accounts:{% endblocktrans %}</p>
+
+            <form method="post" action="{% url 'socialaccount_connections' %}">
+                {% csrf_token %}
+                
+                {{ form.as_p }}
+                
+                <button type="submit" class="m3-button m3-button-outlined" style="color: var(--md-sys-color-error); border-color: var(--md-sys-color-error);">Remove</button>
+            </form>
+            {% else %}
+            <p>{% trans 'You currently have no social network accounts connected to this account.' %}</p>
+            {% endif %}
+            
+            <div style="margin-top: 32px;">
+                <h3 style="margin-bottom: 16px;">{% trans 'Add a 3rd Party Account' %}</h3>
+                
+                {% include "socialaccount/snippets/provider_list.html" with process="connect" %}
+                
+                {% include "socialaccount/snippets/login_extra.html" %}
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

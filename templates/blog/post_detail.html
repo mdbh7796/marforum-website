@@ -1,0 +1,239 @@
+{% extends 'base.html' %}
+
+{% block title %}{{ post.title }} - Blog Directory{% endblock %}
+
+{% block content %}
+<div class="container">
+    <article>
+        <!-- Post Header -->
+        <header style="margin-bottom: 48px;">
+            <div style="display: flex; gap: 8px; margin-bottom: 16px;">
+                {% if post.category %}
+                <a href="{% url 'blog:category_posts' post.category.slug %}" class="tag">{{ post.category.name }}</a>
+                {% endif %}
+                {% for tag in post.tags.all %}
+                <a href="{% url 'blog:tag_posts' tag.slug %}" class="tag">{{ tag.name }}</a>
+                {% endfor %}
+            </div>
+            
+            <h1 style="font-size: 2.5rem; margin-bottom: 16px; line-height: 1.2;">{{ post.title }}</h1>
+            
+            <div style="display: flex; align-items: center; gap: 24px; flex-wrap: wrap;">
+                <a href="{% url 'blog:user_posts' post.author.username %}" style="color: var(--md-sys-color-on-surface); text-decoration: none; display: flex; align-items: center; gap: 12px;">
+                    {% if post.author.profile_picture %}
+                    <img src="{{ post.author.profile_picture.url }}" alt="{{ post.author.username }}" style="width: 48px; height: 48px; border-radius: 50%; object-fit: cover;">
+                    {% else %}
+                    <div style="width: 48px; height: 48px; border-radius: 50%; background-color: var(--md-sys-color-primary); display: flex; align-items: center; justify-content: center; color: white; font-size: 1.25rem;">{{ post.author.username.0|upper }}</div>
+                    {% endif %}
+                    <div>
+                        <div style="font-weight: 600;">{{ post.author.get_full_name|default:post.author.username }}</div>
+                        <div class="text-muted" style="font-size: 0.875rem;">@{{ post.author.username }}</div>
+                    </div>
+                </a>
+                
+                <div class="text-muted">
+                    <span>{{ post.created_at|date:"F d, Y" }}</span>
+                    <span style="margin: 0 8px;">•</span>
+                    <span>{{ post.view_count }} views</span>
+                    <span style="margin: 0 8px;">•</span>
+                    <span>{{ post.comment_count }} comments</span>
+                </div>
+                
+                {% if user == post.author or user.is_moderator_role or user.is_superuser %}
+                <div style="display: flex; gap: 8px; margin-left: auto;">
+                    <a href="{% url 'blog:post_edit' post.slug %}" class="m3-button m3-button-outlined">Edit</a>
+                </div>
+                {% endif %}
+            </div>
+        </header>
+        
+        <!-- Featured Image -->
+        {% if post.featured_image %}
+        <div style="margin-bottom: 48px; border-radius: var(--md-sys-shape-corner-extra-large); overflow: hidden;">
+            <img src="{{ post.featured_image.url }}" alt="{{ post.title }}" style="width: 100%; max-height: 500px; object-fit: cover;">
+        </div>
+        {% endif %}
+        
+        <!-- Post Content -->
+        <div style="display: grid; grid-template-columns: 1fr 280px; gap: 48px;">
+            <div class="markdown-content">
+                {{ rendered_content|safe }}
+            </div>
+            
+            <!-- Sidebar -->
+            <aside>
+                <div class="m3-card sticky-sidebar" style="position: sticky; top: 100px;">
+                    <div class="m3-card-content">
+                        <h4 style="margin-bottom: 16px;">About the Author</h4>
+                        <div style="display: flex; align-items: center; gap: 12px; margin-bottom: 16px;">
+                            {% if post.author.profile_picture %}
+                            <img src="{{ post.author.profile_picture.url }}" alt="{{ post.author.username }}" style="width: 56px; height: 56px; border-radius: 50%; object-fit: cover;">
+                            {% else %}
+                            <div style="width: 56px; height: 56px; border-radius: 50%; background-color: var(--md-sys-color-primary); display: flex; align-items: center; justify-content: center; color: white; font-size: 1.5rem;">{{ post.author.username.0|upper }}</div>
+                            {% endif %}
+                            <div>
+                                <div style="font-weight: 600;">{{ post.author.get_full_name|default:post.author.username }}</div>
+                                <div class="text-muted" style="font-size: 0.875rem;">{{ post.author.role|title }}</div>
+                            </div>
+                        </div>
+                        {% if post.author.bio %}
+                        <p class="text-muted" style="font-size: 0.875rem;">{{ post.author.bio|truncatewords:30 }}</p>
+                        {% endif %}
+                        <a href="{% url 'blog:user_posts' post.author.username %}" class="m3-button m3-button-outlined mt-2" style="width: 100%;">View All Posts</a>
+                    </div>
+                </div>
+            </aside>
+        </div>
+        
+        <!-- Related Posts -->
+        {% if related_posts %}
+        <section style="margin-top: 64px;">
+            <h2 class="mb-3">Related Posts</h2>
+            <div style="display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 24px;">
+                {% for related in related_posts %}
+                <a href="{{ related.get_absolute_url }}" style="text-decoration: none;">
+                    <div class="m3-card">
+                        {% if related.featured_image %}
+                        <img src="{{ related.featured_image.url }}" alt="{{ related.title }}" class="m3-card-media">
+                        {% else %}
+                        <div class="m3-card-media" style="background: linear-gradient(135deg, var(--md-sys-color-primary), var(--md-sys-color-secondary));"></div>
+                        {% endif %}
+                        <div class="m3-card-content">
+                            <h3 style="font-size: 1rem; color: var(--md-sys-color-on-surface);">{{ related.title }}</h3>
+                            <p class="text-muted mt-1" style="font-size: 0.875rem;">{{ related.created_at|date:"M d, Y" }}</p>
+                        </div>
+                    </div>
+                </a>
+                {% endfor %}
+            </div>
+        </section>
+        {% endif %}
+        
+        <!-- Comments Section -->
+        <section style="margin-top: 64px;">
+            <h2 class="mb-3">Comments ({{ post.comment_count }})</h2>
+            
+            <!-- Comment Form -->
+            {% if user.is_authenticated %}
+            <div class="m3-card mb-4">
+                <div class="m3-card-content">
+                    <h4 style="margin-bottom: 16px;">Leave a Comment</h4>
+                    <form method="post" action="{% url 'blog:post_detail' post.slug %}">
+                        {% csrf_token %}
+                        <div class="form-group">
+                            <textarea name="content" class="form-control" rows="4" placeholder="Write your comment..." required></textarea>
+                        </div>
+                        <button type="submit" class="m3-button m3-button-filled">Submit Comment</button>
+                    </form>
+                    <p class="text-muted mt-2" style="font-size: 0.875rem;">Your comment will be visible after moderation.</p>
+                </div>
+            </div>
+            {% else %}
+            <div class="m3-card mb-4">
+                <div class="m3-card-content" style="text-align: center; padding: 32px;">
+                    <p class="text-muted">Please <a href="{% url 'account_login' %}">login</a> or <a href="{% url 'account_signup' %}">sign up</a> to leave a comment.</p>
+                </div>
+            </div>
+            {% endif %}
+            
+            <!-- Comments List -->
+            <div class="comments-list">
+                {% if approved_comments %}
+                {% for comment in approved_comments %}
+                <div class="comment {% if comment.parent %}comment-reply{% endif %}">
+                    <div style="display: flex; align-items: center; gap: 12px; margin-bottom: 12px;">
+                        {% if comment.author.profile_picture %}
+                        <img src="{{ comment.author.profile_picture.url }}" alt="{{ comment.author.username }}" style="width: 40px; height: 40px; border-radius: 50%; object-fit: cover;">
+                        {% else %}
+                        <div style="width: 40px; height: 40px; border-radius: 50%; background-color: var(--md-sys-color-primary); display: flex; align-items: center; justify-content: center; color: white; font-size: 1rem;">{{ comment.author.username.0|upper }}</div>
+                        {% endif %}
+                        <div>
+                            <span class="comment-author">{{ comment.author.username }}</span>
+                            <span class="comment-date">{{ comment.created_at|date:"M d, Y \a\t H:i" }}</span>
+                        </div>
+                    </div>
+                    <p>{{ comment.content }}</p>
+                    <div style="display: flex; gap: 16px; margin-top: 12px;">
+                        {% if user.is_authenticated %}
+                        <button class="reply-btn" style="background: none; border: none; color: var(--md-sys-color-primary); cursor: pointer; font-size: 0.875rem;">Reply</button>
+                        {% endif %}
+                        {% if user.can_moderate or user == comment.author %}
+                        <form method="post" action="{% url 'blog:delete_comment' comment.pk %}" style="display: inline;">
+                            {% csrf_token %}
+                            <button type="submit" style="background: none; border: none; color: var(--md-sys-color-error); cursor: pointer; font-size: 0.875rem;">Delete</button>
+                        </form>
+                        {% endif %}
+                    </div>
+                    
+                    <!-- Reply Form -->
+                    {% if user.is_authenticated %}
+                    <form method="post" action="{% url 'blog:post_detail' post.slug %}" class="reply-form mt-2" style="display: none;">
+                        {% csrf_token %}
+                        <input type="hidden" name="parent_id" value="{{ comment.pk }}">
+                        <textarea name="content" class="form-control" rows="2" placeholder="Write a reply..." required></textarea>
+                        <div style="display: flex; gap: 8px; margin-top: 8px;">
+                            <button type="submit" class="m3-button m3-button-filled" style="padding: 8px 16px;">Reply</button>
+                            <button type="button" class="cancel-reply m3-button m3-button-outlined" style="padding: 8px 16px;">Cancel</button>
+                        </div>
+                    </form>
+                    {% endif %}
+                    
+                    <!-- Nested Replies -->
+                    {% if comment.approved_replies %}
+                    <div class="nested-replies" style="margin-top: 16px; margin-left: 24px;">
+                        {% for reply in comment.approved_replies %}
+                        <div class="comment" style="background-color: var(--md-sys-color-surface);">
+                            <div style="display: flex; align-items: center; gap: 12px; margin-bottom: 12px;">
+                                {% if reply.author.profile_picture %}
+                                <img src="{{ reply.author.profile_picture.url }}" alt="{{ reply.author.username }}" style="width: 32px; height: 32px; border-radius: 50%; object-fit: cover;">
+                                {% else %}
+                                <div style="width: 32px; height: 32px; border-radius: 50%; background-color: var(--md-sys-color-secondary); display: flex; align-items: center; justify-content: center; color: white; font-size: 0.875rem;">{{ reply.author.username.0|upper }}</div>
+                                {% endif %}
+                                <div>
+                                    <span class="comment-author">{{ reply.author.username }}</span>
+                                    <span class="comment-date">{{ reply.created_at|date:"M d, Y" }}</span>
+                                </div>
+                            </div>
+                            <p>{{ reply.content }}</p>
+                        </div>
+                        {% endfor %}
+                    </div>
+                    {% endif %}
+                </div>
+                {% endfor %}
+                {% else %}
+                <p class="text-muted">No comments yet. Be the first to comment!</p>
+                {% endif %}
+            </div>
+        </section>
+    </article>
+</div>
+
+<script>
+document.querySelectorAll('.reply-btn').forEach(function(btn) {
+    btn.addEventListener('click', function() {
+        const comment = this.closest('.comment');
+        const replyForm = comment.querySelector('.reply-form');
+        replyForm.style.display = 'block';
+    });
+});
+
+document.querySelectorAll('.cancel-reply').forEach(function(btn) {
+    btn.addEventListener('click', function() {
+        const replyForm = this.closest('.reply-form');
+        replyForm.style.display = 'none';
+    });
+});
+</script>
+
+<style>
+@media (max-width: 900px) {
+    .container > article > div[style*="grid-template-columns"] {
+        grid-template-columns: 1fr !important;
+    }
+    .sticky-sidebar {
+        position: static !important;
+    }
+}
+</style>
+{% endblock %}

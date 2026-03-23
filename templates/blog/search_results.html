@@ -1,0 +1,26 @@
+{% if posts %}
+<div style="padding: 16px;">
+    {% for post in posts %}
+    <div class="search-result-item">
+        <a href="{{ post.get_absolute_url }}">
+            <div style="display: flex; gap: 16px;">
+                {% if post.featured_image %}
+                <img src="{{ post.featured_image.url }}" alt="{{ post.title }}" style="width: 80px; height: 60px; object-fit: cover; border-radius: 8px;">
+                {% else %}
+                <div style="width: 80px; height: 60px; background: linear-gradient(135deg, var(--md-sys-color-primary), var(--md-sys-color-secondary)); border-radius: 8px;"></div>
+                {% endif %}
+                <div>
+                    <h4 style="margin: 0 0 4px 0; color: var(--md-sys-color-on-surface); font-size: 1rem;">{{ post.title }}</h4>
+                    <p style="margin: 0; color: var(--md-sys-color-on-surface-variant); font-size: 0.875rem;">{{ post.excerpt|truncatewords:15 }}</p>
+                    <span style="color: var(--md-sys-color-outline); font-size: 0.75rem;">{{ post.created_at|date:"M d, Y" }} • {{ post.author.username }}</span>
+                </div>
+            </div>
+        </a>
+    </div>
+    {% endfor %}
+</div>
+{% else %}
+<div style="padding: 24px; text-align: center;">
+    <p class="text-muted">No posts found for "<strong>{{ query }}</strong>"</p>
+</div>
+{% endif %}

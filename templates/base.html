@@ -1,0 +1,990 @@
+{% load static i18n %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% block title %}MARForum{% endblock %}</title>
+    
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600&family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    
+    <!-- Material Components Web -->
+    <link href="https://unpkg.com/material-components-web@14.0.0/dist/material-components-web.min.css" rel="stylesheet">
+    <script src="https://unpkg.com/material-components-web@14.0.0/dist/material-components-web.min.js"></script>
+    
+    <!-- HTMX -->
+    <script src="https://unpkg.com/htmx.org@1.9.10/dist/htmx.min.js"></script>
+    
+    <!-- EasyMDE Markdown Editor -->
+    <link href="https://cdn.jsdelivr.net/npm/easymde/dist/easymde.min.css" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/easymde/dist/easymde.min.js"></script>
+    
+    <!-- M3 CSS Variables -->
+    <style>
+        :root {
+            /* Primary - Blue */
+            --md-sys-color-primary: #005FB8;
+            --md-sys-color-primary-light: #4A8FD9;
+            --md-sys-color-primary-dark: #003A75;
+            --md-sys-color-on-primary: #FFFFFF;
+            --md-sys-color-primary-container: #D4E3FF;
+            --md-sys-color-on-primary-container: #001C3A;
+            
+            /* Secondary */
+            --md-sys-color-secondary: #546179;
+            --md-sys-color-secondary-container: #D8E2F7;
+            --md-sys-color-on-secondary-container: #111C2B;
+            
+            /* Tertiary */
+            --md-sys-color-tertiary: #6B5679;
+            --md-sys-color-tertiary-container: #F2DAFF;
+            --md-sys-color-on-tertiary-container: #251430;
+            
+            /* Error */
+            --md-sys-color-error: #BA1A1A;
+            --md-sys-color-error-container: #FFDAD6;
+            
+            /* Surface */
+            --md-sys-color-surface: #FDFCFF;
+            --md-sys-color-surface-variant: #E0E2EC;
+            --md-sys-color-on-surface: #1B1B1F;
+            --md-sys-color-on-surface-variant: #44464F;
+            
+            /* Background */
+            --md-sys-color-background: #FDFCFF;
+            --md-sys-color-on-background: #1B1B1F;
+            
+            /* Outline */
+            --md-sys-color-outline: #74777F;
+            --md-sys-color-outline-variant: #C4C6D0;
+            
+            /* M3 Typography */
+            --md-sys-typescale-display-large: 'Plus Jakarta Sans', sans-serif;
+            --md-sys-typescale-display-medium: 'Plus Jakarta Sans', sans-serif;
+            --md-sys-typescale-display-small: 'Plus Jakarta Sans', sans-serif;
+            --md-sys-typescale-headline-large: 'Plus Jakarta Sans', sans-serif;
+            --md-sys-typescale-headline-medium: 'Plus Jakarta Sans', sans-serif;
+            --md-sys-typescale-headline-small: 'Plus Jakarta Sans', sans-serif;
+            --md-sys-typescale-title-large: 'Plus Jakarta Sans', sans-serif;
+            --md-sys-typescale-title-medium: 'Plus Jakarta Sans', sans-serif;
+            --md-sys-typescale-title-small: 'Plus Jakarta Sans', sans-serif;
+            --md-sys-typescale-body-large: 'Inter', sans-serif;
+            --md-sys-typescale-body-medium: 'Inter', sans-serif;
+            --md-sys-typescale-body-small: 'Inter', sans-serif;
+            --md-sys-typescale-label-large: 'Inter', sans-serif;
+            --md-sys-typescale-label-medium: 'Inter', sans-serif;
+            --md-sys-typescale-label-small: 'Inter', sans-serif;
+            
+            /* M3 Elevation */
+            --md-sys-elevation-1: 0 1px 2px rgba(0,0,0,0.3), 0 1px 3px 1px rgba(0,0,0,0.15);
+            --md-sys-elevation-2: 0 1px 2px rgba(0,0,0,0.3), 0 2px 6px 2px rgba(0,0,0,0.15);
+            --md-sys-elevation-3: 0 4px 8px 3px rgba(0,0,0,0.15), 0 1px 3px rgba(0,0,0,0.3);
+            
+            /* Border Radius */
+            --md-sys-shape-corner-extra-large: 24px;
+            --md-sys-shape-corner-large: 16px;
+            --md-sys-shape-corner-medium: 12px;
+            --md-sys-shape-corner-small: 8px;
+        }
+        
+        /* Dark Theme */
+        @media (prefers-color-scheme: dark) {
+            :root {
+                --md-sys-color-primary: #A8C8FF;
+                --md-sys-color-primary-light: #4A8FD9;
+                --md-sys-color-primary-dark: #A8C8FF;
+                --md-sys-color-on-primary: #003062;
+                --md-sys-color-primary-container: #00468A;
+                --md-sys-color-on-primary-container: #D4E3FF;
+                
+                --md-sys-color-surface: #1B1B1F;
+                --md-sys-color-surface-variant: #44464F;
+                --md-sys-color-on-surface: #E3E2E6;
+                --md-sys-color-on-surface-variant: #C4C6D0;
+                
+                --md-sys-color-background: #1B1B1F;
+                --md-sys-color-on-background: #E3E2E6;
+            }
+        }
+        
+        /* Global Styles */
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: var(--md-sys-typescale-body-large);
+            background: linear-gradient(135deg, #f6f8fd 0%, #f1f5f9 100%);
+            color: var(--md-sys-color-on-background);
+            line-height: 1.6;
+            min-height: 100vh;
+        }
+        
+        @media (prefers-color-scheme: dark) {
+            body {
+                background: linear-gradient(135deg, #13141c 0%, #1e1e2e 100%);
+            }
+        }
+        
+        h1, h2, h3, h4, h5, h6 {
+            font-family: var(--md-sys-typescale-title-large);
+            font-weight: 600;
+            line-height: 1.3;
+        }
+        
+        /* M3 Card */
+        .m3-card {
+            border-radius: var(--md-sys-shape-corner-extra-large);
+            background: rgba(253, 252, 255, 0.8);
+            backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px);
+            border: 1px solid rgba(255, 255, 255, 0.4);
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.05);
+            overflow: hidden;
+            transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+        }
+        
+        @media (prefers-color-scheme: dark) {
+            .m3-card {
+                background: rgba(27, 27, 31, 0.6);
+                border: 1px solid rgba(255, 255, 255, 0.08);
+                box-shadow: 0 8px 32px rgba(0, 0, 0, 0.2);
+            }
+        }
+        
+        .m3-card:hover {
+            transform: translateY(-8px) scale(1.02);
+            box-shadow: 0 16px 40px rgba(0, 0, 0, 0.1);
+            border-color: var(--md-sys-color-primary-light);
+        }
+        
+        .m3-card-media {
+            width: 100%;
+            height: 200px;
+            object-fit: cover;
+        }
+        
+        .m3-card-content {
+            padding: 24px;
+        }
+        
+        /* M3 Button */
+        .m3-button {
+            border: none;
+            border-radius: 30px;
+            padding: 12px 28px;
+            font-family: var(--md-sys-typescale-label-large);
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1);
+            text-decoration: none;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .m3-button-filled {
+            background: linear-gradient(135deg, var(--md-sys-color-primary), #4A8FD9);
+            color: var(--md-sys-color-on-primary);
+            box-shadow: 0 4px 15px rgba(0, 95, 184, 0.3);
+        }
+        
+        .m3-button-filled:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(0, 95, 184, 0.4);
+            background: linear-gradient(135deg, var(--md-sys-color-primary-dark), #4A8FD9);
+        }
+        
+        .m3-button-outlined {
+            background-color: transparent;
+            border: 1px solid var(--md-sys-color-outline);
+            color: var(--md-sys-color-primary);
+        }
+        
+        .m3-button-outlined:hover {
+            background-color: var(--md-sys-color-surface-variant);
+        }
+        
+        /* FAB */
+        .m3-fab {
+            position: fixed;
+            bottom: 24px;
+            right: 24px;
+            width: 56px;
+            height: 56px;
+            border-radius: 16px;
+            background-color: var(--md-sys-color-primary-container);
+            color: var(--md-sys-color-on-primary-container);
+            border: none;
+            box-shadow: var(--md-sys-elevation-3);
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.2s ease;
+            z-index: 1000;
+        }
+        
+        .m3-fab:hover {
+            box-shadow: var(--md-sys-elevation-3);
+            transform: scale(1.05);
+        }
+        
+        /* Layout */
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 0 24px;
+        }
+        
+        .navbar {
+            background: rgba(253, 252, 255, 0.75);
+            backdrop-filter: blur(16px);
+            -webkit-backdrop-filter: blur(16px);
+            border-bottom: 1px solid rgba(255, 255, 255, 0.3);
+            padding: 16px 0;
+            position: sticky;
+            top: 0;
+            z-index: 100;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.03);
+            transition: all 0.3s ease;
+        }
+        
+        @media (prefers-color-scheme: dark) {
+            .navbar {
+                background: rgba(27, 27, 31, 0.85);
+                border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+            }
+        }
+        
+        .navbar-content {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+        
+        .navbar-brand {
+            font-family: var(--md-sys-typescale-display-small);
+            font-weight: 700;
+            text-decoration: none;
+            font-size: 1.7rem;
+            display: flex;
+            align-items: center;
+            letter-spacing: -0.5px;
+            background: linear-gradient(45deg, var(--md-sys-color-primary), #20B2AA);
+            background-clip: text;
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            transition: transform 0.3s ease;
+        }
+        
+        .navbar-brand:hover {
+            transform: scale(1.05);
+        }
+        
+        .navbar-nav {
+            display: flex;
+            align-items: center;
+            gap: 24px;
+            list-style: none;
+        }
+        
+        .navbar-nav a {
+            color: var(--md-sys-color-on-surface);
+            text-decoration: none;
+            font-family: var(--md-sys-typescale-label-large);
+        }
+        
+        .navbar-nav a:hover {
+            color: var(--md-sys-color-primary);
+        }
+        
+        /* Search */
+        .search-container {
+            position: relative;
+            max-width: 400px;
+            width: 100%;
+        }
+        
+        .search-input {
+            width: 100%;
+            padding: 12px 16px;
+            border: 2px solid var(--md-sys-color-outline);
+            border-radius: var(--md-sys-shape-corner-extra-large);
+            font-family: var(--md-sys-typescale-body-large);
+            background-color: var(--md-sys-color-surface);
+            color: var(--md-sys-color-on-surface);
+            transition: border-color 0.2s ease;
+        }
+        
+        .search-input:focus {
+            outline: none;
+            border-color: var(--md-sys-color-primary);
+        }
+        
+        #search-results {
+            position: absolute;
+            top: 100%;
+            left: 0;
+            right: 0;
+            background: var(--md-sys-color-surface);
+            border-radius: var(--md-sys-shape-corner-medium);
+            box-shadow: var(--md-sys-elevation-2);
+            max-height: 400px;
+            overflow-y: auto;
+            z-index: 1000;
+        }
+        
+        .search-result-item {
+            padding: 12px 16px;
+            border-bottom: 1px solid var(--md-sys-color-outline-variant);
+            transition: background-color 0.2s ease;
+        }
+        
+        .search-result-item:last-child {
+            border-bottom: none;
+        }
+        
+        .search-result-item:hover {
+            background-color: var(--md-sys-color-surface-variant);
+        }
+        
+        .search-result-item a {
+            color: var(--md-sys-color-on-surface);
+            text-decoration: none;
+            display: block;
+        }
+        
+        /* Main Content */
+        main {
+            padding: 48px 0;
+            min-height: calc(100vh - 200px);
+        }
+        
+        /* Footer */
+        footer {
+            background-color: var(--md-sys-color-surface);
+            border-top: 1px solid var(--md-sys-color-outline-variant);
+            padding: 48px 0;
+            margin-top: 48px;
+        }
+        
+        /* Utilities */
+        .text-center { text-align: center; }
+        .text-primary { color: var(--md-sys-color-primary); }
+        .text-muted { color: var(--md-sys-color-on-surface-variant); }
+        .mt-1 { margin-top: 8px; }
+        .mt-2 { margin-top: 16px; }
+        .mt-3 { margin-top: 24px; }
+        .mt-4 { margin-top: 32px; }
+        .mb-1 { margin-bottom: 8px; }
+        .mb-2 { margin-bottom: 16px; }
+        .mb-3 { margin-bottom: 24px; }
+        .mb-4 { margin-bottom: 32px; }
+        
+        /* Tags */
+        .tag {
+            display: inline-block;
+            padding: 4px 12px;
+            background-color: var(--md-sys-color-secondary-container);
+            color: var(--md-sys-color-on-secondary-container);
+            border-radius: var(--md-sys-shape-corner-small);
+            font-family: var(--md-sys-typescale-label-medium);
+            text-decoration: none;
+            transition: all 0.2s ease;
+        }
+        
+        .tag:hover {
+            background-color: var(--md-sys-color-primary-container);
+            color: var(--md-sys-color-on-primary-container);
+        }
+        
+        /* Alert/Messages */
+        .messages {
+            list-style: none;
+            padding: 0;
+            margin: 0 0 24px 0;
+        }
+        
+        .messages li {
+            padding: 16px 24px;
+            border-radius: var(--md-sys-shape-corner-medium);
+            margin-bottom: 8px;
+        }
+        
+        .messages .success {
+            background-color: #D4E3FF;
+            color: #001C3A;
+        }
+        
+        .messages .error {
+            background-color: var(--md-sys-color-error-container);
+            color: var(--md-sys-color-error);
+        }
+        
+        /* Form Styles */
+        .form-group {
+            margin-bottom: 24px;
+        }
+        
+        .form-label {
+            display: block;
+            margin-bottom: 8px;
+            font-family: var(--md-sys-typescale-label-large);
+            color: var(--md-sys-color-on-surface);
+        }
+        
+        .form-control {
+            width: 100%;
+            padding: 12px 16px;
+            border: 2px solid var(--md-sys-color-outline);
+            border-radius: var(--md-sys-shape-corner-small);
+            font-family: var(--md-sys-typescale-body-large);
+            background-color: var(--md-sys-color-surface);
+            color: var(--md-sys-color-on-surface);
+            transition: border-color 0.2s ease;
+        }
+        
+        .form-control:focus {
+            outline: none;
+            border-color: var(--md-sys-color-primary);
+        }
+        
+        .form-error {
+            color: var(--md-sys-color-error);
+            font-size: 0.875rem;
+            margin-top: 4px;
+        }
+        
+        /* Markdown Content */
+        .markdown-content {
+            font-family: var(--md-sys-typescale-body-large);
+            line-height: 1.8;
+        }
+        
+        .markdown-content h1, 
+        .markdown-content h2, 
+        .markdown-content h3, 
+        .markdown-content h4 {
+            margin-top: 32px;
+            margin-bottom: 16px;
+        }
+        
+        .markdown-content p {
+            margin-bottom: 16px;
+        }
+        
+        .markdown-content code {
+            background-color: var(--md-sys-color-surface-variant);
+            padding: 2px 6px;
+            border-radius: 4px;
+            font-family: monospace;
+        }
+        
+        .markdown-content pre {
+            background-color: var(--md-sys-color-surface-variant);
+            padding: 16px;
+            border-radius: var(--md-sys-shape-corner-medium);
+            overflow-x: auto;
+            margin: 16px 0;
+        }
+        
+        .markdown-content pre code {
+            background: none;
+            padding: 0;
+        }
+        
+        .markdown-content blockquote {
+            border-left: 4px solid var(--md-sys-color-primary);
+            padding-left: 16px;
+            margin: 16px 0;
+            color: var(--md-sys-color-on-surface-variant);
+        }
+        
+        .markdown-content img {
+            max-width: 100%;
+            border-radius: var(--md-sys-shape-corner-medium);
+        }
+        
+        .markdown-content ul, 
+        .markdown-content ol {
+            margin: 16px 0;
+            padding-left: 24px;
+        }
+        
+        /* Comments */
+        .comment {
+            padding: 16px;
+            border-radius: var(--md-sys-shape-corner-medium);
+            background-color: var(--md-sys-color-surface-variant);
+            margin-bottom: 16px;
+        }
+        
+        .comment-reply {
+            margin-left: 48px;
+        }
+        
+        .comment-author {
+            font-weight: 600;
+            color: var(--md-sys-color-primary);
+        }
+        
+        .comment-date {
+            font-size: 0.875rem;
+            color: var(--md-sys-color-on-surface-variant);
+        }
+        
+        .mobile-menu-toggle {
+            display: none;
+            background: none;
+            border: none;
+            color: var(--md-sys-color-primary);
+            cursor: pointer;
+            padding: 8px;
+        }
+
+        /* Responsive */
+        @media (max-width: 768px) {
+            .navbar-content {
+                flex-wrap: wrap;
+            }
+            .mobile-menu-toggle {
+                display: block;
+                order: 2;
+            }
+            .search-container {
+                max-width: 100%;
+                order: 4;
+                width: 100%;
+                margin-top: 16px;
+            }
+            .navbar-nav {
+                display: none;
+                width: 100%;
+                flex-direction: column;
+                align-items: center;
+                gap: 16px;
+                padding-top: 16px;
+                order: 3;
+            }
+            .navbar-nav.active {
+                display: flex;
+            }
+            .m3-fab {
+                bottom: 16px;
+                right: 16px;
+            }
+            main {
+                padding: 24px 0;
+            }
+        }
+        @media (max-width: 480px) {
+            .m3-card-content {
+                padding: 20px !important;
+            }
+            h1 { font-size: 2rem !important; }
+        }
+    </style>
+    
+    {% block extra_css %}{% endblock %}
+</head>
+<body>
+    <!-- Navbar -->
+    <nav class="navbar">
+        <div class="container navbar-content">
+            <a href="{% url 'blog:post_list' %}" class="navbar-brand">
+                <svg width="36" height="36" viewBox="0 0 24 24" fill="#4CAF50" xmlns="http://www.w3.org/2000/svg" style="margin-right: 12px; filter: drop-shadow(0px 4px 6px rgba(76, 175, 80, 0.5));">
+                    <path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/>
+                </svg>
+                MARForum
+            </a>
+            
+            <button class="mobile-menu-toggle" aria-label="Toggle menu">
+                <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 12h18M3 6h18M3 18h18"/></svg>
+            </button>
+            
+            <div class="search-container">
+                <input type="text" 
+                       name="q" 
+                       class="search-input" 
+                       placeholder="Search posts..."
+                       hx-get="{% url 'blog:live_search' %}"
+                       hx-trigger="keyup changed delay:300ms"
+                       hx-target="#search-results"
+                       hx-swap="innerHTML">
+                <div id="search-results"></div>
+            </div>
+            
+            <ul class="navbar-nav">
+                <li><a href="{% url 'blog:post_list' %}">Home</a></li>
+                {% if user.is_authenticated %}
+                    {% if user.is_author_role %}
+                        <li><a href="{% url 'blog:post_create' %}">New Post</a></li>
+                    {% endif %}
+                    {% if user.can_moderate %}
+                        <li><a href="{% url 'blog:moderation_dashboard' %}">Moderate</a></li>
+                    {% endif %}
+                    <li><a href="{% url 'account_logout' %}">Logout</a></li>
+                {% else %}
+                    <li><a href="{% url 'account_login' %}">Login</a></li>
+                    <li><a href="{% url 'account_signup' %}">Sign Up</a></li>
+                {% endif %}
+            </ul>
+        </div>
+    </nav>
+    
+    <!-- Messages -->
+    {% if messages %}
+    <div class="container mt-2">
+        <ul class="messages">
+            {% for message in messages %}
+                <li class="{{ message.tags }}">{{ message }}</li>
+            {% endfor %}
+        </ul>
+    </div>
+    {% endif %}
+    
+    <!-- Main Content -->
+    <main>
+        {% block content %}{% endblock %}
+    </main>
+    
+    <!-- FAB Button -->
+    {% if user.is_authenticated and user.is_author_role %}
+        <a href="{% url 'blog:post_create' %}" class="m3-fab" title="Create New Post">
+            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <line x1="12" y1="5" x2="12" y2="19"></line>
+                <line x1="5" y1="12" x2="19" y2="12"></line>
+            </svg>
+        </a>
+    {% endif %}
+    
+    <!-- Footer -->
+    <footer class="site-footer">
+        <div class="footer-newsletter">
+            <div class="container" style="display: flex; flex-wrap: wrap; justify-content: space-between; align-items: center; gap: 24px;">
+                <div class="newsletter-text">
+                    <h3 style="font-family: var(--md-sys-typescale-display-small); font-size: 1.5rem; margin-bottom: 8px;">Stay Updated</h3>
+                    <p style="color: var(--md-sys-color-on-primary-container);">Get updates on trending discussions in Morocco.</p>
+                </div>
+                <!-- Fixed accessibility issues by providing a name and an id -->
+                <form class="newsletter-form" style="display: flex; gap: 8px; flex: 1; max-width: 480px;" method="POST" action="#">
+                    {% csrf_token %}
+                    <input type="email" name="email" id="newsletter_email" placeholder="Email address" required style="flex: 1; padding: 12px 16px; border: none; border-radius: 100px; font-family: var(--md-sys-typescale-body-large);">
+                    <button type="submit" class="m3-button m3-button-filled" style="background: var(--md-sys-color-primary); color: white; white-space: nowrap;">Subscribe</button>
+                </form>
+            </div>
+        </div>
+
+        <div class="container footer-main">
+            <div class="footer-grid">
+                <!-- Col 1: Brand & About & Socials -->
+                <div class="footer-col brand-col">
+                    <a href="{% url 'blog:post_list' %}" class="footer-brand" style="display: flex; align-items: center; gap: 8px; text-decoration: none; margin-bottom: 16px;">
+                        <svg width="32" height="32" viewBox="0 0 24 24" fill="#4CAF50" xmlns="http://www.w3.org/2000/svg">
+                            <path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/>
+                        </svg>
+                        <span style="font-family: var(--md-sys-typescale-display-small); font-weight: 700; font-size: 1.5rem; background: linear-gradient(45deg, var(--md-sys-color-primary), #20B2AA); background-clip: text; -webkit-background-clip: text; -webkit-text-fill-color: transparent;">Marforum</span>
+                    </a>
+                    <p class="footer-desc" style="margin-bottom: 0;">Marforum is a community platform for Moroccans to share ideas, ask questions, and connect.</p>
+                </div>
+
+                <!-- Col 2: Navigation & Community -->
+                <div class="footer-col">
+                    <h4 class="footer-heading">Community</h4>
+                    <ul class="footer-links">
+                        <li><a href="{% url 'blog:post_list' %}">Home</a></li>
+                        <li><a href="{% url 'blog:category_index' %}">Categories / Topics</a></li>
+                        <li><a href="{% url 'blog:latest_discussions' %}">Latest Discussions</a></li>
+                        <li><a href="{% url 'blog:popular_threads' %}">Popular Threads</a></li>
+                        <li><a href="{% url 'blog:about' %}">About Us</a></li>
+                        <li><a href="{% url 'blog:faq' %}">Community Guidelines</a></li>
+                        {% if user.is_authenticated %}
+                        <li><a href="{% url 'blog:post_create' %}" class="highlight-link">Create a New Post</a></li>
+                        {% else %}
+                        <li><a href="{% url 'account_signup' %}" class="highlight-link">Join the community</a></li>
+                        {% endif %}
+                    </ul>
+                </div>
+
+                <!-- Col 3: Legal & Support -->
+                <div class="footer-col">
+                    <h4 class="footer-heading">Support & Legal</h4>
+                    <ul class="footer-links">
+                        <li><a href="{% url 'blog:faq' %}">Help / FAQ</a></li>
+                        <li><a href="{% url 'blog:contact' %}">Contact Page</a></li>
+                        <li><a href="{% url 'blog:report' %}">Report a problem</a></li>
+                        <li><a href="mailto:support@marforum.com">support@marforum.com</a></li>
+                        <li style="margin-top: 12px;"><a href="{% url 'blog:privacy' %}" class="legal-link">Privacy Policy</a></li>
+                        <li><a href="{% url 'blog:terms' %}" class="legal-link">Terms of Service</a></li>
+                        <li><a href="{% url 'blog:cookies' %}" class="legal-link">Cookie Policy</a></li>
+                        <li><a href="{% url 'blog:disclaimer' %}" class="legal-link">Disclaimer</a></li>
+                    </ul>
+                </div>
+
+                <!-- Col 4: Trending Content -->
+                <div class="footer-col">
+                    <h4 class="footer-heading">Trending Now</h4>
+                    <ul class="footer-trending">
+                        {% for trend in footer_trending_posts %}
+                        <li>
+                            <a href="{{ trend.get_absolute_url }}">
+                                <span class="trend-title">{{ trend.title|truncatechars:35 }}</span>
+                                <span class="trend-meta">{{ trend.comment_count }} comments</span>
+                            </a>
+                        </li>
+                        {% empty %}
+                        <li>
+                            <p class="text-muted" style="font-size: 0.9rem;">No trending discussions right now.</p>
+                        </li>
+                        {% endfor %}
+                    </ul>
+                </div>
+            </div>
+
+            <div class="footer-bottom">
+                <div class="footer-copyright">
+                    &copy; 2026 Marforum. All rights reserved.
+                </div>
+                <div class="footer-lang">
+                    <form action="{% url 'set_language' %}" method="post" style="display: flex; align-items: center; gap: 8px;">
+                        {% csrf_token %}
+                        <input name="next" type="hidden" value="{{ redirect_to }}">
+                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="2" y1="12" x2="22" y2="12"/><path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"/></svg>
+                        <select name="language" id="language_selector" aria-label="Language selector" class="lang-select" onchange="this.form.submit()">
+                            {% get_current_language as LANGUAGE_CODE %}
+                            {% get_available_languages as LANGUAGES %}
+                            {% for lang in LANGUAGES %}
+                                <option value="{{ lang.0 }}" {% if lang.0 == LANGUAGE_CODE %}selected{% endif %}>
+                                    {{ lang.1 }}
+                                </option>
+                            {% endfor %}
+                        </select>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </footer>
+
+    <style>
+        .site-footer {
+            background-color: var(--md-sys-color-surface);
+            border-top: 1px solid var(--md-sys-color-outline-variant);
+            margin-top: 64px;
+            color: var(--md-sys-color-on-surface);
+            font-family: var(--md-sys-typescale-body-large);
+        }
+
+        .footer-newsletter {
+            padding: 40px 0;
+            border-bottom: 1px solid var(--md-sys-color-outline-variant);
+            background: linear-gradient(135deg, rgba(212, 227, 255, 0.5), rgba(32, 178, 170, 0.15));
+        }
+
+        @media (prefers-color-scheme: dark) {
+            .footer-newsletter {
+                background: linear-gradient(135deg, rgba(0, 70, 138, 0.4), rgba(1, 87, 85, 0.3));
+            }
+        }
+
+        .footer-main {
+            padding: 64px 24px 24px;
+        }
+
+        .footer-grid {
+            display: grid;
+            grid-template-columns: 1.5fr 1fr 1fr 1.2fr;
+            gap: 48px;
+            margin-bottom: 64px;
+        }
+
+        .footer-desc {
+            color: var(--md-sys-color-on-surface-variant);
+            line-height: 1.6;
+            margin-bottom: 24px;
+            max-width: 320px;
+        }
+
+        .footer-heading {
+            font-family: var(--md-sys-typescale-title-large);
+            font-weight: 700;
+            font-size: 1.2rem;
+            margin-bottom: 20px;
+            color: var(--md-sys-color-on-surface);
+        }
+
+        .footer-links, .footer-trending {
+            list-style: none;
+            padding: 0;
+            margin: 0;
+        }
+
+        .footer-links li {
+            margin-bottom: 12px;
+        }
+
+        .footer-links a {
+            color: var(--md-sys-color-on-surface-variant);
+            text-decoration: none;
+            transition: color 0.2s ease, transform 0.2s ease;
+            display: inline-block;
+        }
+
+        .footer-links a:hover {
+            color: var(--md-sys-color-primary);
+            transform: translateX(4px);
+        }
+
+        .highlight-link {
+            color: var(--md-sys-color-primary) !important;
+            font-weight: 600;
+        }
+
+        .legal-link {
+            font-size: 0.85rem;
+            opacity: 0.8;
+        }
+
+        .footer-trending li {
+            margin-bottom: 16px;
+        }
+        
+        .footer-trending a {
+            display: flex;
+            flex-direction: column;
+            text-decoration: none;
+            padding: 12px;
+            border-radius: 12px;
+            background: rgba(0,0,0,0.02);
+            transition: background 0.2s ease, transform 0.2s ease;
+        }
+
+        @media (prefers-color-scheme: dark) {
+            .footer-trending a {
+                background: rgba(255,255,255,0.03);
+            }
+        }
+
+        .footer-trending a:hover {
+            background: var(--md-sys-color-surface-variant);
+            transform: translateX(4px);
+        }
+
+        .trend-title {
+            color: var(--md-sys-color-on-surface);
+            font-weight: 600;
+            margin-bottom: 4px;
+            font-size: 0.95rem;
+        }
+
+        .trend-meta {
+            color: var(--md-sys-color-primary);
+            font-size: 0.8rem;
+            font-weight: 500;
+        }
+
+        .footer-bottom {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding-top: 24px;
+            border-top: 1px solid var(--md-sys-color-outline-variant);
+            flex-wrap: wrap;
+            gap: 16px;
+        }
+
+        .footer-copyright {
+            color: var(--md-sys-color-on-surface-variant);
+            font-size: 0.9rem;
+        }
+
+        .footer-lang {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            color: var(--md-sys-color-on-surface-variant);
+        }
+
+        .lang-select {
+            background: transparent;
+            border: 1px solid var(--md-sys-color-outline-variant);
+            color: var(--md-sys-color-on-surface);
+            padding: 6px 12px;
+            border-radius: 8px;
+            font-family: inherit;
+            cursor: pointer;
+            outline: none;
+            transition: border-color 0.2s ease;
+        }
+        
+        .lang-select:focus {
+            border-color: var(--md-sys-color-primary);
+        }
+
+        @media (max-width: 992px) {
+            .footer-grid {
+                grid-template-columns: 1fr 1fr;
+            }
+        }
+
+        @media (max-width: 576px) {
+            .footer-grid {
+                grid-template-columns: 1fr;
+                gap: 48px;
+            }
+            .newsletter-form {
+                width: 100%;
+                flex-direction: column;
+            }
+            .newsletter-text {
+                text-align: center;
+                width: 100%;
+            }
+            .footer-bottom {
+                flex-direction: column;
+                text-align: center;
+            }
+            .footer-lang {
+                justify-content: center;
+            }
+        }
+    </style>
+    
+    <!-- Scripts -->
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            // Mobile Menu Toggle
+            const mobileMenuBtn = document.querySelector('.mobile-menu-toggle');
+            const navbarNav = document.querySelector('.navbar-nav');
+            if(mobileMenuBtn) {
+                mobileMenuBtn.addEventListener('click', () => {
+                    navbarNav.classList.toggle('active');
+                });
+            }
+            
+            // EasyMDE Init
+            const markdownTextareas = document.querySelectorAll('.markdown-editor');
+            markdownTextareas.forEach(function(textarea) {
+                if (!textarea.classList.contains('mdc-text-field__input')) {
+                    new EasyMDE({ 
+                        element: textarea,
+                        spellChecker: false,
+                        placeholder: 'Write your content here using Markdown...',
+                        initialValue: textarea.value,
+                    });
+                }
+            });
+        });
+    </script>
+    
+    {% block extra_js %}{% endblock %}
+</body>
+</html>

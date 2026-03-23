@@ -1,0 +1,71 @@
+{% extends "socialaccount/snippets/base.html" %}
+{% load i18n %}
+
+{% block title %}{% trans "Google OAuth2 Setup" %}{% endblock %}
+
+{% block content %}
+<div style="max-width: 800px; margin: 48px auto;">
+    <h1 style="margin-bottom: 24px;">{% trans "Google OAuth2 Setup" %}</h1>
+    
+    <div class="m3-card">
+        <div class="m3-card-content">
+            <h2 style="margin-bottom: 16px;">Prerequisites</h2>
+            <ol style="margin-bottom: 24px; padding-left: 24px;">
+                <li style="margin-bottom: 8px;">A Google Cloud Console account</li>
+                <li style="margin-bottom: 8px;">A project created in Google Cloud Console</li>
+            </ol>
+            
+            <h2 style="margin-bottom: 16px;">Steps to Configure</h2>
+            <ol style="padding-left: 24px;">
+                <li style="margin-bottom: 16px;">
+                    <strong>Create OAuth 2.0 Credentials:</strong>
+                    <ul style="margin-top: 8px; padding-left: 20px;">
+                        <li>Go to <a href="https://console.cloud.google.com/apis/credentials" target="_blank" style="color: var(--md-sys-color-primary);">Google Cloud Console Credentials</a></li>
+                        <li>Click "Create Credentials" → "OAuth client ID"</li>
+                        <li>Application type: "Web application"</li>
+                        <li>Name: "Blog Directory" (or your choice)</li>
+                    </ul>
+                </li>
+                
+                <li style="margin-bottom: 16px;">
+                    <strong>Configure Authorized Redirect URIs:</strong>
+                    <ul style="margin-top: 8px; padding-left: 20px;">
+                        <li>Add the following URI:</li>
+                        <li style="background-color: var(--md-sys-color-surface-variant); padding: 8px; border-radius: 4px; font-family: monospace; margin: 8px 0;">
+                            http://127.0.0.1:8000/accounts/google/login/callback/
+                        </li>
+                        <li>For production, also add your domain:</li>
+                        <li style="background-color: var(--md-sys-color-surface-variant); padding: 8px; border-radius: 4px; font-family: monospace;">
+                            https://yourdomain.com/accounts/google/login/callback/
+                        </li>
+                    </ul>
+                </li>
+                
+                <li style="margin-bottom: 16px;">
+                    <strong>Get Your Credentials:</strong>
+                    <ul style="margin-top: 8px; padding-left: 20px;">
+                        <li>Copy the "Client ID" and "Client Secret"</li>
+                        <li>Add them to your <code>.env</code> file:</li>
+                    </ul>
+                    <pre style="background-color: var(--md-sys-color-surface-variant); padding: 16px; border-radius: 8px; margin: 12px 0; overflow-x: auto;">GOOGLE_OAUTH_CLIENT_ID=your-client-id.apps.googleusercontent.com
+GOOGLE_OAUTH_CLIENT_SECRET=your-client-secret</pre>
+                </li>
+                
+                <li style="margin-bottom: 16px;">
+                    <strong>Enable Google+ API:</strong>
+                    <ul style="margin-top: 8px; padding-left: 20px;">
+                        <li>Go to <a href="https://console.cloud.google.com/apis/library" target="_blank" style="color: var(--md-sys-color-primary);">Google Cloud Console API Library</a></li>
+                        <li>Search for "Google+ API"</li>
+                        <li>Click "Enable"</li>
+                    </ul>
+                </li>
+            </ol>
+            
+            <div style="background-color: var(--md-sys-color-primary-container); padding: 16px; border-radius: var(--md-sys-shape-corner-medium); margin-top: 24px;">
+                <strong style="color: var(--md-sys-color-on-primary-container);">Note:</strong>
+                <span style="color: var(--md-sys-color-on-primary-container);">Make sure your SITE_ID in Django settings matches the site where users will log in.</span>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

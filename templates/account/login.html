@@ -1,0 +1,133 @@
+{% extends "base.html" %}
+{% load i18n %}
+{% load account socialaccount %}
+
+{% block title %}{% trans "Sign In" %} - MARForum{% endblock %}
+
+{% block extra_css %}
+<style>
+    .auth-container {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        min-height: calc(100vh - 200px);
+        padding: 48px 24px;
+    }
+    .auth-card {
+        width: 100%;
+        max-width: 480px;
+        background: rgba(255, 255, 255, 0.85);
+        backdrop-filter: blur(20px);
+        -webkit-backdrop-filter: blur(20px);
+        border: 1px solid rgba(255, 255, 255, 0.5);
+        border-radius: var(--md-sys-shape-corner-extra-large);
+        box-shadow: 0 12px 40px rgba(0, 0, 0, 0.08);
+        padding: 40px;
+        position: relative;
+        overflow: hidden;
+    }
+    .auth-card::before {
+        content: '';
+        position: absolute;
+        top: 0; left: 0; right: 0; height: 6px;
+        background: linear-gradient(90deg, var(--md-sys-color-primary), #20B2AA);
+    }
+    @media (prefers-color-scheme: dark) {
+        .auth-card {
+            background: rgba(30, 30, 36, 0.85);
+            border-color: rgba(255, 255, 255, 0.1);
+            box-shadow: 0 12px 40px rgba(0, 0, 0, 0.3);
+        }
+    }
+    .auth-title {
+        font-family: var(--md-sys-typescale-display-small);
+        font-weight: 700;
+        text-align: center;
+        margin-bottom: 32px;
+        background: linear-gradient(45deg, var(--md-sys-color-primary), #20B2AA);
+        background-clip: text;
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+    }
+    .auth-form p {
+        margin-bottom: 24px;
+    }
+    .auth-form label {
+        display: block;
+        margin-bottom: 8px;
+        font-weight: 500;
+        font-family: var(--md-sys-typescale-label-large);
+        color: var(--md-sys-color-on-surface);
+    }
+    .auth-form input[type="text"],
+    .auth-form input[type="password"],
+    .auth-form input[type="email"] {
+        width: 100%;
+        padding: 14px 16px;
+        border: 2px solid var(--md-sys-color-outline-variant);
+        border-radius: 12px;
+        font-family: var(--md-sys-typescale-body-large);
+        background: var(--md-sys-color-surface);
+        color: var(--md-sys-color-on-surface);
+        transition: all 0.3s ease;
+    }
+    .auth-form input:focus {
+        outline: none;
+        border-color: var(--md-sys-color-primary);
+        box-shadow: 0 0 0 4px rgba(0, 95, 184, 0.1);
+        transform: translateY(-2px);
+    }
+    .auth-form .helptext {
+        font-size: 0.85rem;
+        color: var(--md-sys-color-on-surface-variant);
+        margin-top: 6px;
+        display: block;
+    }
+    @media (max-width: 480px) {
+        .auth-card { padding: 24px; }
+        .auth-title { font-size: 2rem; }
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="auth-container">
+    <div class="auth-card">
+        <h1 class="auth-title">Welcome Back</h1>
+        
+        {% get_providers as socialaccount_providers %}
+        {% if socialaccount_providers %}
+        <div style="margin-bottom: 24px;">
+            {% include "socialaccount/snippets/provider_list.html" with process="login" %}
+        </div>
+        
+        <div style="display: flex; align-items: center; margin-bottom: 24px;">
+            <div style="flex: 1; height: 1px; background-color: var(--md-sys-color-outline-variant);"></div>
+            <span style="padding: 0 16px; color: var(--md-sys-color-on-surface-variant); font-size: 0.9rem;">or sign in with email</span>
+            <div style="flex: 1; height: 1px; background-color: var(--md-sys-color-outline-variant);"></div>
+        </div>
+        {% endif %}
+        
+        <form class="auth-form" method="post" action="{% url 'account_login' %}">
+            {% csrf_token %}
+            
+            {{ form.as_p }}
+            
+            {% if redirect_field_value %}
+            <input type="hidden" name="{{ redirect_field_name }}" value="{{ redirect_field_value }}" />
+            {% endif %}
+            
+            <button type="submit" class="m3-button m3-button-filled" style="width: 100%; margin-top: 8px; padding: 14px; font-size: 1.1rem;">{% trans "Sign In" %}</button>
+        </form>
+        
+        <div style="text-align: center; margin-top: 24px; padding-top: 24px; border-top: 1px solid var(--md-sys-color-outline-variant);">
+            <p class="text-muted" style="margin-bottom: 12px;">
+                Don't have an account? <a href="{{ signup_url }}" style="color: var(--md-sys-color-primary); font-weight: 600; text-decoration: none;">Sign up for free</a>
+            </p>
+            {% if password_reset_url %}
+            <a href="{{ password_reset_url }}" style="color: var(--md-sys-color-on-surface-variant); font-size: 0.9rem; text-decoration: none; transition: color 0.2s;">Forgot your password?</a>
+            {% endif %}
+        </div>
+    </div>
+</div>
+{% endblock %}

@@ -1,0 +1,40 @@
+{% extends "base.html" %}
+{% load i18n %}
+
+{% block title %}{% trans "Email Verification Sent" %} - Blog Directory{% endblock %}
+
+{% block content %}
+<div class="container">
+    <div style="max-width: 480px; margin: 0 auto; padding: 48px 0;">
+        <div class="m3-card">
+            <div class="m3-card-content" style="text-align: center; padding: 48px;">
+                <svg xmlns="http://www.w3.org/2000/svg" width="64" height="64" viewBox="0 0 24 24" fill="none" stroke="var(--md-sys-color-primary)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="margin-bottom: 24px;">
+                    <path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"></path>
+                    <polyline points="22,6 12,13 2,6"></polyline>
+                </svg>
+                
+                <h2 style="margin-bottom: 16px;">{% trans "Verify Your E-mail Address" %}</h2>
+                
+                {% if confirmation %}
+                {% user_display confirmation.email_address.user as user_display %}
+                <p class="text-muted mb-4">
+                    {% blocktrans with confirmation.email_address.email as email %}We have sent an e-mail to <strong>{{ email }}</strong> for verification.{% endblocktrans %}
+                </p>
+                {% else %}
+                <p class="text-muted mb-4">
+                    {% blocktrans %}We have sent an e-mail to you for verification.{% endblocktrans %}
+                </p>
+                {% endif %}
+                
+                <p class="text-muted mb-4">
+                    {% blocktrans %}Follow the link in the email to verify your account.{% endblocktrans %}
+                </p>
+                
+                <p class="text-muted">
+                    {% blocktrans %}<a href="{{ email_url }}">Re-send verification email</a>{% endblocktrans %}
+                </p>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

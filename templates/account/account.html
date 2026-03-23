@@ -1,0 +1,93 @@
+{% extends "base.html" %}
+{% load i18n %}
+
+{% block title %}{% trans "Account" %} - Blog Directory{% endblock %}
+
+{% block content %}
+<div class="container">
+    <div style="max-width: 800px; margin: 0 auto; padding: 48px 0;">
+        <h1 class="mb-3">{% trans "Account" %}</h1>
+        
+        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 24px;">
+            <!-- Profile Info -->
+            <div class="m3-card">
+                <div class="m3-card-content">
+                    <h3 style="margin-bottom: 24px;">Profile Information</h3>
+                    
+                    <div style="display: flex; align-items: center; gap: 16px; margin-bottom: 24px;">
+                        {% if user.profile_picture %}
+                        <img src="{{ user.profile_picture.url }}" alt="{{ user.username }}" style="width: 80px; height: 80px; border-radius: 50%; object-fit: cover;">
+                        {% else %}
+                        <div style="width: 80px; height: 80px; border-radius: 50%; background-color: var(--md-sys-color-primary); display: flex; align-items: center; justify-content: center; color: white; font-size: 2rem;">{{ user.username.0|upper }}</div>
+                        {% endif %}
+                        <div>
+                            <h4 style="margin: 0;">{{ user.get_full_name|default:user.username }}</h4>
+                            <p class="text-muted" style="margin: 4px 0 0 0;">@{{ user.username }}</p>
+                            <span class="tag" style="margin-top: 8px;">{{ user.get_role_display }}</span>
+                        </div>
+                    </div>
+                    
+                    <dl style="margin: 0;">
+                        <div style="display: flex; justify-content: space-between; padding: 8px 0; border-bottom: 1px solid var(--md-sys-color-outline-variant);">
+                            <dt class="text-muted">Email</dt>
+                            <dd style="margin: 0;">{{ user.email }}</dd>
+                        </div>
+                        <div style="display: flex; justify-content: space-between; padding: 8px 0; border-bottom: 1px solid var(--md-sys-color-outline-variant);">
+                            <dt class="text-muted">Member since</dt>
+                            <dd style="margin: 0;">{{ user.date_joined|date:"M d, Y" }}</dd>
+                        </div>
+                        <div style="display: flex; justify-content: space-between; padding: 8px 0;">
+                            <dt class="text-muted">Posts</dt>
+                            <dd style="margin: 0;">{{ user.posts.count }}</dd>
+                        </div>
+                    </dl>
+                </div>
+            </div>
+            
+            <!-- Social Accounts -->
+            <div class="m3-card">
+                <div class="m3-card-content">
+                    <h3 style="margin-bottom: 24px;">{% trans "Social Accounts" %}</h3>
+                    
+                    {% get_social_accounts user as accounts %}
+                    
+                    {% if accounts.google %}
+                    <div style="display: flex; align-items: center; gap: 12px; padding: 12px; background-color: var(--md-sys-color-surface-variant); border-radius: var(--md-sys-shape-corner-small); margin-bottom: 12px;">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                            <path d="M20 4H4a2 2 0 0 0-2 2v12a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2V6a2 2 0 0 0-2-2Z"></path>
+                            <path d="m20 8-5 4-5-4"></path>
+                        </svg>
+                        <div style="flex: 1;">
+                            <span style="font-weight: 600;">Google</span>
+                            <span class="text-muted" style="font-size: 0.875rem; display: block;">Connected</span>
+                        </div>
+                    </div>
+                    {% else %}
+                    <div style="display: flex; align-items: center; gap: 12px; padding: 12px; background-color: var(--md-sys-color-surface-variant); border-radius: var(--md-sys-shape-corner-small); margin-bottom: 12px;">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                            <path d="M20 4H4a2 2 0 0 0-2 2v12a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2V6a2 2 0 0 0-2-2Z"></path>
+                            <path d="m20 8-5 4-5-4"></path>
+                        </svg>
+                        <div style="flex: 1;">
+                            <span style="font-weight: 600;">Google</span>
+                            <span class="text-muted" style="font-size: 0.875rem; display: block;">Not connected</span>
+                        </div>
+                    </div>
+                    <a href="{% provider_login_url 'google' %}" class="m3-button m3-button-outlined" style="width: 100%;">Connect Google</a>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+        
+        <!-- Quick Actions -->
+        <div style="margin-top: 24px;">
+            <h3 class="mb-3">Quick Actions</h3>
+            <div style="display: flex; gap: 16px; flex-wrap: wrap;">
+                <a href="{% url 'blog:post_create' %}" class="m3-button m3-button-filled">Create New Post</a>
+                <a href="{% url 'blog:user_posts' user.username %}" class="m3-button m3-button-outlined">View My Posts</a>
+                <a href="{% url 'account_logout' %}" class="m3-button m3-button-outlined" style="color: var(--md-sys-color-error);">Logout</a>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

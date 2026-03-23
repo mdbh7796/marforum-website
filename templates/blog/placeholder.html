@@ -1,0 +1,24 @@
+{% extends 'base.html' %}
+
+{% block title %}{{ page_title }} - MARForum{% endblock %}
+
+{% block content %}
+<div class="container">
+    <div class="m3-card" style="padding: 64px 32px; text-align: center; max-width: 800px; margin: 40px auto; border-radius: 32px;">
+        <svg width="64" height="64" viewBox="0 0 24 24" fill="none" stroke="var(--md-sys-color-primary)" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" style="margin-bottom: 24px; opacity: 0.8;"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
+        
+        <h1 style="font-family: var(--md-sys-typescale-display-small); font-weight: 800; font-size: 2.5rem; margin-bottom: 16px;">
+            {{ page_title }}
+        </h1>
+        
+        <p class="text-muted" style="font-size: 1.1rem; line-height: 1.6; margin-bottom: 32px; max-width: 500px; margin-inline: auto;">
+            This page is currently under construction. Our team is working hard to bring you the full Marforum experience soon.
+        </p>
+        
+        <a href="{% url 'blog:post_list' %}" class="m3-button m3-button-filled" style="font-size: 1.05rem; padding: 14px 32px; border-radius: 100px;">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="margin-right: 8px;"><path d="M19 12H5M12 19l-7-7 7-7"/></svg>
+            Back to Home
+        </a>
+    </div>
+</div>
+{% endblock %}

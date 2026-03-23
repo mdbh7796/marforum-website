@@ -1,0 +1,30 @@
+{% extends 'base.html' %}
+
+{% block title %}Confirm Delete - Blog Directory{% endblock %}
+
+{% block content %}
+<div class="container">
+    <div style="max-width: 600px; margin: 0 auto;">
+        <div class="m3-card">
+            <div class="m3-card-content" style="text-align: center; padding: 48px;">
+                <svg xmlns="http://www.w3.org/2000/svg" width="64" height="64" viewBox="0 0 24 24" fill="none" stroke="var(--md-sys-color-error)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="margin-bottom: 24px;">
+                    <circle cx="12" cy="12" r="10"></circle>
+                    <line x1="12" y1="8" x2="12" y2="12"></line>
+                    <line x1="12" y1="16" x2="12.01" y2="16"></line>
+                </svg>
+                
+                <h2 style="margin-bottom: 16px;">Delete Post?</h2>
+                <p class="text-muted mb-4">Are you sure you want to delete "<strong>{{ object.title }}</strong>"? This action cannot be undone.</p>
+                
+                <form method="post">
+                    {% csrf_token %}
+                    <div style="display: flex; gap: 16px; justify-content: center;">
+                        <button type="submit" class="m3-button m3-button-filled" style="background-color: var(--md-sys-color-error);">Delete</button>
+                        <a href="{% url 'blog:post_detail' object.slug %}" class="m3-button m3-button-outlined">Cancel</a>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
