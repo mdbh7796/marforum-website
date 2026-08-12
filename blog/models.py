@@ -5,6 +5,8 @@ from django.urls import reverse
 from taggit.managers import TaggableManager
 from mptt.models import MPTTModel, TreeForeignKey
 
+from .rendering import render_markdown
+
 
 class CustomUser(AbstractUser):
     ROLE_CHOICES = [
@@ -77,6 +79,7 @@ class Post(models.Model):
     featured_image = models.ImageField(upload_to='posts/', blank=True, null=True)
     excerpt = models.TextField(max_length=500, blank=True)
     content = models.TextField(help_text='Write your content using Markdown')
+    rendered_content = models.TextField(blank=True, default='')
     tags = TaggableManager(blank=True)
     status = models.CharField(max_length=20, choices=STATUS_CHOICES, default='draft')
     view_count = models.PositiveIntegerField(default=0)
@@ -106,6 +109,7 @@ class Post(models.Model):
                 unique_slug = f"{base_slug}-{counter}"
                 counter += 1
             self.slug = unique_slug
+        self.rendered_content = render_markdown(self.content)
         super().save(*args, **kwargs)
     
     def get_absolute_url(self):
@@ -164,3 +168,16 @@ class Comment(MPTTModel):
         if self.post.author == user:
             return True
         return False
+
+
+class NewsletterSubscriber(models.Model):
+    email = models.EmailField(unique=True)
+    subscribed_at = models.DateTimeField(auto_now_add=True)
+    is_active = models.BooleanField(default=True)
+
+    class Meta:
+        ordering = ['-subscribed_at']
+        verbose_name_plural = 'Newsletter subscribers'
+
+    def __str__(self):
+        return self.email

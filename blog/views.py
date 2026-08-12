@@ -9,13 +9,12 @@ from django.contrib import messages
 from django.core.paginator import Paginator, PageNotAnInteger, EmptyPage
 from django.http import HttpResponse
 from django.utils import timezone
-from django.db.models import Q, Prefetch
-from taggit.models import Tag
-import markdown
-
-from .models import Post, Comment, Category, CustomUser
-from .forms import PostForm, CommentForm
 from django.db.models import Q, Prefetch, Count
+from taggit.models import Tag
+
+from .models import Post, Comment, Category, CustomUser, NewsletterSubscriber
+from .forms import PostForm, CommentForm
+from .rendering import render_markdown
 
 class PostListView(ListView):
     model = Post
@@ -72,9 +71,15 @@ class PostDetailView(DetailView):
     context_object_name = 'post'
     
     def get_queryset(self):
-        return Post.objects.select_related(
+        user = self.request.user
+        base = Post.objects.select_related(
             'author', 'category'
         ).prefetch_related('tags')
+        if user.is_authenticated and (user.is_moderator_role or user.is_superuser):
+            return base
+        if user.is_authenticated:
+            return base.filter(Q(status='published') | Q(author=user))
+        return base.filter(status='published')
     
     def get(self, request, *args, **kwargs):
         response = super().get(request, *args, **kwargs)
@@ -108,10 +113,7 @@ class PostDetailView(DetailView):
             category=post.category
         ).exclude(pk=post.pk)[:4]
         
-        context['rendered_content'] = markdown.markdown(
-            post.content,
-            extensions=['fenced_code', 'codehilite', 'tables', 'nl2br']
-        )
+        context['rendered_content'] = post.rendered_content or render_markdown(post.content)
         
         return context
     
@@ -219,7 +221,9 @@ class TagPostListView(ListView):
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
         context['tag'] = self.tag
-        context['categories'] = Category.objects.all()
+        context['categories'] = Category.objects.annotate(
+            post_count=Count('posts', filter=Q(posts__status='published'))
+        )
         context['popular_tags'] = Tag.objects.all()[:20]
         return context
 
@@ -240,7 +244,9 @@ class CategoryPostListView(ListView):
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
         context['category'] = self.category
-        context['categories'] = Category.objects.all()
+        context['categories'] = Category.objects.annotate(
+            post_count=Count('posts', filter=Q(posts__status='published'))
+        )
         context['popular_tags'] = Tag.objects.all()[:20]
         return context
 
@@ -261,7 +267,9 @@ class UserPostListView(ListView):
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
         context['profile_user'] = self.user
-        context['categories'] = Category.objects.all()
+        context['categories'] = Category.objects.annotate(
+            post_count=Count('posts', filter=Q(posts__status='published'))
+        )
         context['popular_tags'] = Tag.objects.all()[:20]
         return context
 
@@ -336,6 +344,31 @@ def delete_comment(request, pk):
         messages.success(request, 'Comment deleted.')
     
     return redirect('blog:post_detail', slug=post.slug)
+
+
+def newsletter_signup(request):
+    if request.method == 'POST':
+        email = (request.POST.get('email') or '').strip().lower()
+
+        if email:
+            from django.core.validators import validate_email
+            from django.core.exceptions import ValidationError as EmailValidationError
+
+            try:
+                validate_email(email)
+            except EmailValidationError:
+                messages.error(request, 'Please enter a valid email address.')
+                return redirect('blog:post_list')
+
+            NewsletterSubscriber.objects.get_or_create(
+                email=email,
+                defaults={'is_active': True}
+            )
+            messages.success(request, 'Thanks for subscribing! You will hear from us soon.')
+        else:
+            messages.error(request, 'Please enter your email address.')
+
+    return redirect('blog:post_list')
 
 
 class PlaceholderView(TemplateView):

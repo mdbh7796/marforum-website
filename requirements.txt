@@ -12,6 +12,7 @@ Pillow>=10.0.0
 # Content Rendering
 markdownify>=0.14.0
 markdown>=3.5.0
+bleach>=6.0.0
 
 # Tagging
 django-taggit>=5.0.0
