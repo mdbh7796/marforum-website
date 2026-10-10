@@ -676,7 +676,7 @@
                     <p style="color: var(--md-sys-color-on-primary-container);">Get updates on trending discussions in Morocco.</p>
                 </div>
                 <!-- Fixed accessibility issues by providing a name and an id -->
-                <form class="newsletter-form" style="display: flex; gap: 8px; flex: 1; max-width: 480px;" method="POST" action="#">
+                <form class="newsletter-form" style="display: flex; gap: 8px; flex: 1; max-width: 480px;" method="POST" action="{% url 'blog:newsletter_signup' %}">
                     {% csrf_token %}
                     <input type="email" name="email" id="newsletter_email" placeholder="Email address" required style="flex: 1; padding: 12px 16px; border: none; border-radius: 100px; font-family: var(--md-sys-typescale-body-large);">
                     <button type="submit" class="m3-button m3-button-filled" style="background: var(--md-sys-color-primary); color: white; white-space: nowrap;">Subscribe</button>
@@ -738,7 +738,7 @@
                         <li>
                             <a href="{{ trend.get_absolute_url }}">
                                 <span class="trend-title">{{ trend.title|truncatechars:35 }}</span>
-                                <span class="trend-meta">{{ trend.comment_count }} comments</span>
+                                <span class="trend-meta">{{ trend.approved_comment_count }} comments</span>
                             </a>
                         </li>
                         {% empty %}

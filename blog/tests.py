@@ -1,6 +1,7 @@
 from django.test import TestCase
 from django.urls import reverse
-from blog.models import Post, CustomUser, Category
+from blog.models import Post, CustomUser, Category, NewsletterSubscriber
+from blog.rendering import render_markdown
 
 class PostModelTest(TestCase):
     def setUp(self):
@@ -57,3 +58,67 @@ class CustomUserRoleTest(TestCase):
         self.assertTrue(superuser.is_moderator_role)
         self.assertTrue(superuser.is_admin_role)
         self.assertTrue(superuser.can_moderate())
+
+
+class RenderingTest(TestCase):
+    def test_markdown_strips_script_tags(self):
+        self.assertNotIn('<script>', render_markdown('<script>alert(1)</script>'))
+        self.assertNotIn('onclick', render_markdown('<img src="x" onclick="alert(1)">'))
+        self.assertNotIn('javascript:', render_markdown('[x](javascript:alert(1))'))
+
+    def test_markdown_keeps_safe_html(self):
+        result = render_markdown('**bold** and [link](https://example.com)')
+        self.assertIn('<strong>bold</strong>', result)
+        self.assertIn('href="https://example.com"', result)
+
+
+class PostDetailAccessTest(TestCase):
+    def setUp(self):
+        self.author = CustomUser.objects.create_user(username='author1', password='pw')
+        self.category = Category.objects.create(name='Cat', slug='cat')
+        self.published = Post.objects.create(
+            title='Published Post', content='Content', author=self.author,
+            category=self.category, status='published'
+        )
+        self.draft = Post.objects.create(
+            title='Draft Post', content='Content', author=self.author, status='draft'
+        )
+
+    def test_draft_not_visible_to_anonymous(self):
+        url = reverse('blog:post_detail', kwargs={'slug': self.draft.slug})
+        self.assertEqual(self.client.get(url).status_code, 404)
+
+    def test_published_visible_to_anonymous(self):
+        url = reverse('blog:post_detail', kwargs={'slug': self.published.slug})
+        self.assertEqual(self.client.get(url).status_code, 200)
+
+    def test_author_can_view_own_draft(self):
+        self.client.force_login(self.author)
+        url = reverse('blog:post_detail', kwargs={'slug': self.draft.slug})
+        self.assertEqual(self.client.get(url).status_code, 200)
+
+
+class TrendingContextProcessorTest(TestCase):
+    def setUp(self):
+        self.user = CustomUser.objects.create_user(username='trendauthor', password='pw')
+        self.post = Post.objects.create(
+            title='Trending Post', content='Content', author=self.user, status='published'
+        )
+
+    def test_returns_published_posts_without_error(self):
+        from blog.context_processors import trending_posts
+        result = trending_posts(self.client.get('/'))
+        self.assertIn('footer_trending_posts', result)
+        self.assertEqual(len(result['footer_trending_posts']), 1)
+
+
+class NewsletterSignupTest(TestCase):
+    def test_subscribe_creates_subscriber(self):
+        response = self.client.post(reverse('blog:newsletter_signup'), {'email': 'test@example.com'})
+        self.assertRedirects(response, reverse('blog:post_list'))
+        self.assertTrue(NewsletterSubscriber.objects.filter(email='test@example.com').exists())
+
+    def test_duplicate_email_is_idempotent(self):
+        NewsletterSubscriber.objects.create(email='dup@example.com')
+        self.client.post(reverse('blog:newsletter_signup'), {'email': 'dup@example.com'})
+        self.assertEqual(NewsletterSubscriber.objects.filter(email='dup@example.com').count(), 1)

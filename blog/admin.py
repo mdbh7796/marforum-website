@@ -1,7 +1,7 @@
 from django.contrib import admin
 from django.contrib.auth.admin import UserAdmin
 from mptt.admin import MPTTModelAdmin
-from .models import CustomUser, Post, Comment, Category
+from .models import CustomUser, Post, Comment, Category, NewsletterSubscriber
 
 
 @admin.register(CustomUser)
@@ -105,3 +105,19 @@ class CommentAdmin(MPTTModelAdmin):
     def reject_comments(self, request, queryset):
         updated = queryset.update(status='rejected')
         self.message_user(request, f'{updated} comment(s) rejected.')
+
+
+@admin.register(NewsletterSubscriber)
+class NewsletterSubscriberAdmin(admin.ModelAdmin):
+    list_display = ['email', 'is_active', 'subscribed_at']
+    list_filter = ['is_active', 'subscribed_at']
+    search_fields = ['email']
+    actions = ['activate_subscribers', 'deactivate_subscribers']
+    
+    def activate_subscribers(self, request, queryset):
+        updated = queryset.update(is_active=True)
+        self.message_user(request, f'{updated} subscriber(s) activated.')
+    
+    def deactivate_subscribers(self, request, queryset):
+        updated = queryset.update(is_active=False)
+        self.message_user(request, f'{updated} subscriber(s) deactivated.')
